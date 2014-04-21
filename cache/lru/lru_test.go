@@ -1,6 +1,7 @@
 package lru
 
 import (
+	"github.com/flatpeach/coconut/cache"
 	"testing"
 )
 
@@ -19,7 +20,7 @@ func TestLRUBasic(t *testing.T) {
 		t.Fatal("The capacity of LRU cache not matched!")
 	}
 
-	key := Key("hello")
+	key := cache.Key("hello")
 
 	value := &CacheItem{[]byte("HelloWorld")}
 
@@ -63,9 +64,9 @@ func TestLRUBasic(t *testing.T) {
 func TestLRUEvict(t *testing.T) {
 	c := New(0, 2)
 
-	key1 := Key("k1")
-	key2 := Key("k2")
-	key3 := Key("k3")
+	key1 := cache.Key("k1")
+	key2 := cache.Key("k2")
+	key3 := cache.Key("k3")
 
 	val1 := &CacheItem{[]byte("HelloWorld")}
 	val2 := &CacheItem{[]byte("HelloWorld")}
