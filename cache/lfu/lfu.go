@@ -2,12 +2,15 @@ package lfu
 
 import (
 	"container/list"
-	"github.com/flatpeach/coconut/cache"
 	"sync"
 )
 
 // This package implements a O(1) LFU
 // Followed the origin paper http://dhruvbird.com/lfu.pdf
+
+type Value interface {
+	Size() int
+}
 
 type Cache struct {
 	mu sync.Mutex
@@ -16,17 +19,17 @@ type Cache struct {
 	size        uint64
 	maxElements uint64
 	freq        *list.List
-	caches      map[cache.Key]*entry
+	caches      map[string]*entry
 }
 
 type node struct {
 	freq  int
-	items map[cache.Key]uint8
+	items map[string]uint8
 }
 
 type entry struct {
-	key    cache.Key
-	value  cache.Value
+	key    string
+	value  Value
 	parent *list.Element
 }
 
@@ -40,13 +43,13 @@ func New(capacity uint64, maxElements uint64) *Cache {
 		capacity:    capacity,
 		maxElements: maxElements,
 		freq:        list.New(),
-		caches:      make(map[cache.Key]*entry),
+		caches:      make(map[string]*entry),
 	}
 
 	return cache
 }
 
-func (c *Cache) Set(key cache.Key, value cache.Value) {
+func (c *Cache) Set(key string, value Value) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -67,7 +70,7 @@ func (c *Cache) Set(key cache.Key, value cache.Value) {
 
 }
 
-func (c *Cache) Get(key cache.Key) (interface{}, bool) {
+func (c *Cache) Get(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -79,7 +82,7 @@ func (c *Cache) Get(key cache.Key) (interface{}, bool) {
 	return nil, false
 }
 
-func (c *Cache) Delete(key cache.Key) {
+func (c *Cache) Delete(key string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -125,7 +128,7 @@ func (c *Cache) Clear() {
 
 	c.freq.Init()
 	c.size = 0
-	c.caches = make(map[cache.Key]*entry)
+	c.caches = make(map[string]*entry)
 
 }
 
@@ -201,7 +204,7 @@ func (c *Cache) increment(e *entry) {
 	if n == nil || n.Value.(*node).freq != freq {
 		nn := &node{
 			freq:  freq,
-			items: make(map[cache.Key]uint8),
+			items: make(map[string]uint8),
 		}
 
 		if current != nil {

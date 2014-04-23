@@ -1,7 +1,6 @@
 package lfu
 
 import (
-	"github.com/flatpeach/coconut/cache"
 	"testing"
 )
 
@@ -17,9 +16,9 @@ func TestLFU(t *testing.T) {
 
 	c := New(0, 2)
 
-	key1 := cache.Key("key1")
-	key2 := cache.Key("key2")
-	key3 := cache.Key("key3")
+	key1 := "key1"
+	key2 := "key2"
+	key3 := "key3"
 
 	value1 := &CacheItem{[]byte("value1")}
 	value2 := &CacheItem{[]byte("value2")}

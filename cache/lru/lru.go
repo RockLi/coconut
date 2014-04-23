@@ -4,13 +4,16 @@ package lru
 
 import (
 	"container/list"
-	"github.com/flatpeach/coconut/cache"
 	"sync"
 )
 
+type Value interface {
+	Size() int
+}
+
 type entry struct {
-	key   cache.Key   // Key for this item
-	value cache.Value // Value for this item
+	key   string // Key for this item
+	value Value  // Value for this item
 }
 
 type Cache struct {
@@ -20,7 +23,7 @@ type Cache struct {
 	capacity    uint64
 	maxElements uint64
 	items       *list.List
-	caches      map[cache.Key]*list.Element
+	caches      map[string]*list.Element
 }
 
 // Both capacity and maxElements equal to 0 means no limitation
@@ -30,13 +33,13 @@ func New(capacity uint64, maxElements uint64) *Cache {
 		capacity:    capacity,
 		maxElements: maxElements,
 		items:       list.New(),
-		caches:      make(map[cache.Key]*list.Element),
+		caches:      make(map[string]*list.Element),
 	}
 
 	return c
 }
 
-func (c *Cache) Set(key cache.Key, value cache.Value) {
+func (c *Cache) Set(key string, value Value) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -59,7 +62,7 @@ func (c *Cache) Set(key cache.Key, value cache.Value) {
 	c.checkCapacity()
 }
 
-func (c *Cache) Get(key cache.Key) (interface{}, bool) {
+func (c *Cache) Get(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -71,7 +74,7 @@ func (c *Cache) Get(key cache.Key) (interface{}, bool) {
 	return nil, false
 }
 
-func (c *Cache) Delete(key cache.Key) {
+func (c *Cache) Delete(key string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -116,7 +119,7 @@ func (c *Cache) Clear() {
 	defer c.mu.Unlock()
 
 	c.items.Init()
-	c.caches = make(map[cache.Key]*list.Element)
+	c.caches = make(map[string]*list.Element)
 	c.size = 0
 }
 
