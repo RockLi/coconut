@@ -1,4 +1,4 @@
-#coconut
+#coconut [![Build Status](https://travis-ci.org/flatpeach/coconut.svg)](https://travis-ci.org/flatpeach/coconut)
 
 Coconut is a foundation library fully written in Go which includes frequent used data structures and algorithms.
 
