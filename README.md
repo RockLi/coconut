@@ -1,6 +1,6 @@
 #coconut
 
-Coconut is a foundation library including frequent used data structures and algorithms fully written in Go.
+Coconut is a foundation library fully written in Go which includes frequent used data structures and algorithms.
 
 
 ##Aims of this project
@@ -12,18 +12,17 @@ Coconut is a foundation library including frequent used data structures and algo
 
 ##Status of coconut
 
-Before I give this project a version and release it,
-**donot** use this library in your project, 'cause: 
+Before I release coconut v0.1, **donot** use this library in your project, 'cause: 
 
-1. I haven't add enough data structure and algorithms in
-2. Probably I will modify the API frequently
-3. Probably I will regroup the packages like merging different individual small packages into a more meaningful one
-4. Should have many bugs and places can be optimized
+* I haven't add enough data structure and algorithms in
+* Probably I will modify the API frequently
+* Probably I will regroup the packages like merging different individual small packages into a more meaningful one
+* Should have many bugs and places can be optimized
 
 
 ##Planned data strucutre and algorithms
 
-_* means already done_
+_* means already done, but probably I will still refactor it. _
 
 * Cache
   * LRU (*)
@@ -65,10 +64,12 @@ _* means already done_
 * Utils
   * Gcd (*)
 
+* _To be added_
+
 ##Docs
 
 _Currently I haven't finished any docs even valuable comments inside the codes, I will find time to finish this._
 
 
-_To be continued..._
+
 
