@@ -9,6 +9,7 @@ package bitmap
 
 import (
 	"container/list"
+	"os"
 	"sync"
 )
 
@@ -42,8 +43,11 @@ func (o *Option) clone() *Option {
 }
 
 const (
-	pageSize    = 1 << 12 // default to 4K
-	bitsPerByte = 1 << 3  // default to 8bits per byte
+	bitsPerByte = 1 << 3 // default to 8bits per byte, only consider modern computing
+)
+
+var (
+	pageSize    = os.Getpagesize()
 	bitsPerPage = bitsPerByte * pageSize
 )
 

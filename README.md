@@ -53,7 +53,7 @@ _* means already done, but probably I will still refactor it. _
   * Set
 
 * Bitmap
-  * Bitmap
+  * Bitmap (*)
 
 * SkipList
   * Skip List
