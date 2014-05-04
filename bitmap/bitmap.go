@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/*
-	Package bitmap provides a sparse bitmap implementation.
-*/
+// Package bitmap provides a sparsed bitmap implementation.
 package bitmap
 
 import (
@@ -19,27 +17,6 @@ type Bitmap struct {
 	size   int        // total elements stored
 	pages  *list.List // @Todo: here can be optimized
 	option *Option
-}
-
-// Option used to construct the Bitmap
-type Option struct {
-	// Automatically to alloc more spaces for coming elements
-	AutoExpand bool
-
-	// Automatically to recycle resources after delete elements from the bitmap
-	AutoRecycle bool
-
-	// Initial capacity of this Bitmap
-	Capacity int
-}
-
-// return a new option
-func (o *Option) clone() *Option {
-	return &Option{
-		AutoExpand:  o.AutoExpand,
-		AutoRecycle: o.AutoRecycle,
-		Capacity:    o.Capacity,
-	}
 }
 
 const (
@@ -58,18 +35,14 @@ type page struct {
 	bits []uint8
 }
 
-func NewOption(capacity int, autoExpand, autoRecycle bool) *Option {
-	return &Option{
-		AutoExpand:  autoExpand,
-		AutoRecycle: autoRecycle,
-		Capacity:    capacity,
-	}
-}
-
 // Return back a new Bitmap according the option passed in
 func New(option *Option) *Bitmap {
 	if option == nil {
-		option = NewOption(0, true, true)
+		option = &Option{
+			AutoExpand:  true,
+			AutoRecycle: true,
+			Capacity:    0,
+		}
 	}
 	b := &Bitmap{
 		option: option.clone(),

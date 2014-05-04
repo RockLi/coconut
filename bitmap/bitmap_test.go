@@ -67,9 +67,11 @@ func TestBitmap(t *testing.T) {
 }
 
 func TestBitMapAutoExpandDisabled(t *testing.T) {
-	o := NewOption(10, false, false)
-
-	bm := New(o)
+	bm := New(&Option{
+		Capacity:    10,
+		AutoExpand:  false,
+		AutoRecycle: false,
+	})
 
 	bm.Set(100) // Should fail at this step
 	if bm.Test(100) {
@@ -83,8 +85,11 @@ func TestBitMapAutoExpandDisabled(t *testing.T) {
 }
 
 func TestBitMapAutoExpandEnabled(t *testing.T) {
-	o := NewOption(10, true, false)
-	bm := New(o)
+	bm := New(&Option{
+		AutoExpand:  true,
+		AutoRecycle: false,
+		Capacity:    10,
+	})
 
 	bm.Set(100000)
 	if !bm.Test(100000) {
@@ -94,8 +99,11 @@ func TestBitMapAutoExpandEnabled(t *testing.T) {
 }
 
 func TestBitMapAutoRecycleEnabled(t *testing.T) {
-	o := NewOption(10, true, true)
-	bm := New(o)
+	bm := New(&Option{
+		Capacity:    10,
+		AutoExpand:  true,
+		AutoRecycle: true,
+	})
 
 	bm.Set(100000)
 	bm.Clear(100000)
@@ -107,8 +115,11 @@ func TestBitMapAutoRecycleEnabled(t *testing.T) {
 }
 
 func TestBitMapAutoRecycleDisabled(t *testing.T) {
-	o := NewOption(10, true, false)
-	bm := New(o)
+	bm := New(&Option{
+		Capacity:    10,
+		AutoExpand:  true,
+		AutoRecycle: false,
+	})
 
 	bm.Set(100000)
 	bm.Clear(100000)
