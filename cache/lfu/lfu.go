@@ -2,38 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// This package implements a O(1) LFU
+// Followed the origin paper http://dhruvbird.com/lfu.pdf
 package lfu
 
 import (
 	"container/list"
+	"github.com/flatpeach/coconut/cache"
 	"sync"
 )
-
-// This package implements a O(1) LFU
-// Followed the origin paper http://dhruvbird.com/lfu.pdf
-
-type Value interface {
-	Size() int
-}
 
 type Cache struct {
 	mu sync.Mutex
 
-	capacity    uint64
-	size        uint64
-	maxElements uint64
-	freq        *list.List
-	caches      map[string]*entry
+	size   uint64
+	freq   *list.List
+	caches map[cache.Key]*entry
+	o      *Option
 }
 
 type node struct {
 	freq  int
-	items map[string]uint8
+	items map[cache.Key]uint8
 }
 
 type entry struct {
-	key    string
-	value  Value
+	key    cache.Key
+	data   cache.Data
 	parent *list.Element
 }
 
@@ -41,29 +36,33 @@ type entry struct {
 // Freq List: HEAD <-> Node <-> Node <-> Node <-> Tail
 //                     Entry
 
-func New(capacity uint64, maxElements uint64) *Cache {
-	cache := &Cache{
-		size:        0,
-		capacity:    capacity,
-		maxElements: maxElements,
-		freq:        list.New(),
-		caches:      make(map[string]*entry),
+func New(o *Option) *Cache {
+	c := &Cache{
+		size:   0,
+		freq:   list.New(),
+		caches: make(map[cache.Key]*entry),
 	}
 
-	return cache
+	if o == nil {
+		c.o = &Option{0, 0}
+	} else {
+		c.o = &Option{o.Capacity, o.MaxElements}
+	}
+
+	return c
 }
 
-func (c *Cache) Set(key string, value Value) {
+func (c *Cache) Set(key cache.Key, data cache.Data) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	if e, ok := c.caches[key]; ok {
-		e.value = value
+		e.data = data
 		c.increment(e)
 	} else {
 		e := &entry{
-			key:   key,
-			value: value,
+			key:  key,
+			data: data,
 		}
 
 		c.caches[key] = e
@@ -71,22 +70,21 @@ func (c *Cache) Set(key string, value Value) {
 	}
 
 	c.checkCapacity()
-
 }
 
-func (c *Cache) Get(key string) (interface{}, bool) {
+func (c *Cache) Get(key cache.Key) (cache.Data, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	if e, ok := c.caches[key]; ok {
 		c.increment(e)
-		return e.value, true
+		return e.data, true
 	}
 
 	return nil, false
 }
 
-func (c *Cache) Delete(key string) {
+func (c *Cache) Delete(key cache.Key) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -114,15 +112,14 @@ func (c *Cache) Capacity() uint64 {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	return c.capacity
+	return c.o.Capacity
 }
 
 func (c *Cache) SetCapacity(capacity uint64) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.capacity = capacity
-
+	c.o.Capacity = capacity
 	c.checkCapacity()
 }
 
@@ -132,7 +129,7 @@ func (c *Cache) Clear() {
 
 	c.freq.Init()
 	c.size = 0
-	c.caches = make(map[string]*entry)
+	c.caches = make(map[cache.Key]*entry)
 
 }
 
@@ -150,7 +147,7 @@ func (c *Cache) Evict(n int) {
 
 func (c *Cache) removeElement(e *entry) {
 
-	c.size -= uint64(c.caches[e.key].value.Size())
+	c.size -= uint64(c.caches[e.key].data.Size())
 
 	n := e.parent
 	items := n.Value.(*node).items
@@ -178,12 +175,12 @@ func (c *Cache) evictElement(n int) {
 }
 
 func (c *Cache) checkCapacity() {
-	if c.capacity == 0 && c.maxElements == 0 {
+	if c.o.Capacity == 0 && c.o.MaxElements == 0 {
 		return
 	}
 
-	for (c.capacity != 0 && c.size > c.capacity) ||
-		(c.maxElements != 0 && uint64(len(c.caches)) > c.maxElements) {
+	for (c.o.Capacity != 0 && c.size > c.o.Capacity) ||
+		(c.o.MaxElements != 0 && uint64(len(c.caches)) > c.o.MaxElements) {
 		c.evictElement(1)
 	}
 }
@@ -208,7 +205,7 @@ func (c *Cache) increment(e *entry) {
 	if n == nil || n.Value.(*node).freq != freq {
 		nn := &node{
 			freq:  freq,
-			items: make(map[string]uint8),
+			items: make(map[cache.Key]uint8),
 		}
 
 		if current != nil {

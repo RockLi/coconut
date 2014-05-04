@@ -8,25 +8,24 @@ import (
 	"testing"
 )
 
-type CacheItem struct {
+type cacheItem struct {
 	v []byte
 }
 
-func (i *CacheItem) Size() int {
-	return len(i.v)
+func (i *cacheItem) Size() uint64 {
+	return uint64(len(i.v))
 }
 
 func TestLFU(t *testing.T) {
-
-	c := New(0, 2)
+	c := New(&Option{0, 2})
 
 	key1 := "key1"
 	key2 := "key2"
 	key3 := "key3"
 
-	value1 := &CacheItem{[]byte("value1")}
-	value2 := &CacheItem{[]byte("value2")}
-	value3 := &CacheItem{[]byte("value3")}
+	value1 := &cacheItem{[]byte("value1")}
+	value2 := &cacheItem{[]byte("value2")}
+	value3 := &cacheItem{[]byte("value3")}
 
 	c.Set(key1, value1)
 	c.Set(key2, value2)
@@ -45,7 +44,7 @@ func TestLFU(t *testing.T) {
 		t.Fatal("Key1 should in the cache")
 	}
 
-	if v.(*CacheItem) != value1 {
+	if v.(*cacheItem) != value1 {
 		t.Fatal("Value1 changed in cache")
 	}
 
@@ -54,7 +53,7 @@ func TestLFU(t *testing.T) {
 		t.Fatal("Key2 should in the cache")
 	}
 
-	if v.(*CacheItem) != value2 {
+	if v.(*cacheItem) != value2 {
 		t.Fatal("Value2 changed in cache")
 	}
 
