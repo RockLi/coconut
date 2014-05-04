@@ -35,7 +35,7 @@ func New(o *Option) *Cache {
 	if o == nil {
 		c.o = &Option{0, 0}
 	} else {
-		c.o = &Option{o.Capacity(), o.MaxElements()} // copy by value
+		c.o = &Option{o.Capacity, o.MaxElements} // copy by value
 	}
 
 	return c
@@ -104,14 +104,14 @@ func (c *Cache) Capacity() uint64 {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	return c.o.capacity
+	return c.o.Capacity
 }
 
 func (c *Cache) SetCapacity(capacity uint64) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.o.capacity = capacity
+	c.o.Capacity = capacity
 	c.checkCapacity()
 }
 
@@ -125,12 +125,12 @@ func (c *Cache) Clear() {
 }
 
 func (c *Cache) checkCapacity() {
-	if c.o.capacity == 0 && c.o.maxElements == 0 {
+	if c.o.Capacity == 0 && c.o.MaxElements == 0 {
 		return
 	}
 
-	for (c.o.capacity != 0 && c.size > c.o.capacity) ||
-		(c.o.maxElements != 0 && uint64(len(c.caches)) > c.o.maxElements) {
+	for (c.o.Capacity != 0 && c.size > c.o.Capacity) ||
+		(c.o.MaxElements != 0 && uint64(len(c.caches)) > c.o.MaxElements) {
 		c.evictElement(1)
 	}
 }
@@ -162,12 +162,12 @@ func (c *Cache) Full() bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	if c.o.capacity == 0 && c.o.maxElements == 0 {
+	if c.o.Capacity == 0 && c.o.MaxElements == 0 {
 		return false
 	}
 
-	if (c.o.capacity != 0 && c.size >= c.o.capacity) ||
-		(c.o.maxElements != 0 && uint64(len(c.caches)) >= c.o.maxElements) {
+	if (c.o.Capacity != 0 && c.size >= c.o.Capacity) ||
+		(c.o.MaxElements != 0 && uint64(len(c.caches)) >= c.o.MaxElements) {
 		return true
 	}
 
